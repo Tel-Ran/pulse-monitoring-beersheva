@@ -26,6 +26,9 @@ ObjectMapper mapper = new ObjectMapper();
 IPulseReducer pulseReducer;
 @Value("${app.count.reduce: 20}")
 int reduceCount;
+public int getReduceCount() {
+	return reduceCount;
+}
 HashMap<Integer, List<PulseData>> mapPulses = new HashMap<>();
 @StreamListener(IPulseReducer.CONFIGURATION_CHANNEL) 
 void takeConfiguration(String configurationJson) {
