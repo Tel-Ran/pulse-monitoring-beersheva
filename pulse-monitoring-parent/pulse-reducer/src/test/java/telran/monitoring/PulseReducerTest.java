@@ -7,6 +7,7 @@ import static org.junit.Assert.assertNull;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.stream.test.binder.MessageCollector;
 import org.springframework.messaging.Message;
@@ -70,6 +71,7 @@ public class PulseReducerTest {
 	  }
 	@Test
 	public void configurationTest() throws JsonProcessingException {
+		//testing whether the service takes new configuration
 		ConfigurationData configData = new ConfigurationData(Integer.MAX_VALUE, Integer.MAX_VALUE, NEW_REDUCE_COUNT);
 		Message<String> message = new GenericMessage<String>(mapper.writeValueAsString(configData));
 		pulseReducer.getConfig().send(message);
