@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.annotation.StreamListener;
 import org.springframework.cloud.stream.messaging.Sink;
+import org.springframework.context.annotation.Bean;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
@@ -26,15 +27,32 @@ public class AbnormalValuesService {
 	static Logger LOG = LoggerFactory.getLogger(AbnormalValuesService.class);
 	@Value("${app.service.name}")
 	String serviceName;
+	List<String>  phoneNumbers; //mainly for unit test
+public List<String> getPhoneNumbers() {
+		return phoneNumbers;
+	}
+	public void setPhoneNumbers(List<String> phoneNumbers) {
+		this.phoneNumbers = phoneNumbers;
+	}
 @Autowired
 LoadBalancer loadBalancer;
 ObjectMapper mapper = new ObjectMapper();
-RestTemplate restTemplate = new RestTemplate();
+@Autowired
+RestTemplate restTemplate;
+@Bean
+RestTemplate getRestTemplate() {
+	return new RestTemplate();
+}
+private int patientId;
+public int getPatientId() {
+	return patientId;
+}
 @StreamListener(Sink.INPUT)
 void takePatientData(String pulseDataJson)  {
 	LOG.trace("received: {}", pulseDataJson);
 	try {
 		PulseData pulseData = mapper.readValue(pulseDataJson, PulseData.class);
+		patientId = pulseData.patientId;
 		List<String> phones = getPhones(pulseData.patientId);
 		LOG.debug("list of phones {}", phones);
 		sendSms(phones);
@@ -44,6 +62,7 @@ void takePatientData(String pulseDataJson)  {
 }
 private void sendSms(List<String> phones) {
 	//FIXME for real SMS sending
+	phoneNumbers = phones;//for testing purposes
 	phones.stream().forEach(phone -> LOG.debug("sent SMS to phone: {}", phone));
 	
 }
@@ -54,6 +73,7 @@ private List<String> getPhones(int patientId) {
 	ResponseEntity<List<String>> response = restTemplate.exchange(url, HttpMethod.GET, null,
 			new ParameterizedTypeReference<List<String>>() {
 	});
+	
 	return response.getBody();
 }
 }
